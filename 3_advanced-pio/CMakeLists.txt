@@ -1,0 +1,4 @@
+add_executable(advanced_pio advanced_pio.c)
+pico_generate_pio_header(advanced_pio ${CMAKE_CURRENT_LIST_DIR}/advanced_pio.pio)
+target_link_libraries(advanced_pio pico_stdlib hardware_pio)
+pico_add_extra_outputs(advanced_pio)

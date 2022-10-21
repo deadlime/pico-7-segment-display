@@ -1,0 +1,36 @@
+.program advanced_pio
+
+.define PUBLIC pin_count 14
+
+.wrap_target
+  mov isr, x
+  mov x, y
+  mov y, isr
+
+  pull noblock
+  mov x, osr
+
+  out pins, pin_count [5]
+  out pins, pin_count
+.wrap
+
+% c-sdk {
+#include "hardware/clocks.h"
+
+static inline void advanced_pio_program_init(PIO pio, uint sm, uint offset, uint pin) {
+  pio_sm_config config = advanced_pio_program_get_default_config(offset);
+
+  sm_config_set_out_pins(&config, pin, advanced_pio_pin_count);
+
+  float clock_divider = (float) clock_get_hz(clk_sys) / 2000000;
+  sm_config_set_clkdiv(&config, clock_divider);
+
+  for (uint i = 0; i < advanced_pio_pin_count; ++i) {
+    pio_gpio_init(pio, pin + i);
+  }
+  pio_sm_set_consecutive_pindirs(pio, sm, pin, advanced_pio_pin_count, true);
+
+  pio_sm_init(pio, sm, offset, &config);
+  pio_sm_set_enabled(pio, sm, true);
+}
+%}

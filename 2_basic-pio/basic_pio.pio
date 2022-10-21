@@ -1,0 +1,24 @@
+.program basic_pio
+
+.define PUBLIC pin_count 14
+
+loop:
+  pull
+  out pins, pin_count
+  jmp loop
+
+% c-sdk {
+static inline void basic_pio_program_init(PIO pio, uint sm, uint offset, uint pin) {
+  pio_sm_config config = basic_pio_program_get_default_config(offset);
+
+  sm_config_set_out_pins(&config, pin, basic_pio_pin_count);
+
+  for (uint i = 0; i < basic_pio_pin_count; ++i) {
+    pio_gpio_init(pio, pin + i);
+  }
+  pio_sm_set_consecutive_pindirs(pio, sm, pin, basic_pio_pin_count, true);
+
+  pio_sm_init(pio, sm, offset, &config);
+  pio_sm_set_enabled(pio, sm, true);
+}
+%}
